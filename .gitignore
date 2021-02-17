@@ -1,0 +1,10 @@
+# Generated Folders
+build/
+projects/
+
+# Filetypes
+*.exe
+*.ilk
+*.pdb
+*.o
+*.lib
