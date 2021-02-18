@@ -63,7 +63,8 @@ project "wren-test"
       }
 
       sysincludedirs {
-         "ext/wren/include"
+         "ext/wren/include",
+         "ext/wren/vm",
       }
 
       files { 
@@ -73,6 +74,7 @@ project "wren-test"
    
    filter "configurations:Debug"
       debugdir "."
+      debugargs { "script.wren" }
    
    configuration { "linux", "gmake" }
       buildoptions { "-std=c99" }
