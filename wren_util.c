@@ -169,6 +169,19 @@ void pathRemoveExtension(Path *path)
     }
 }
 
+void trimPathPrefix(Path *path)
+{
+    char * p = strchr(path->chars, '/');
+	p++;
+
+    int pos = p - path->chars;
+
+    int copy_length = path->length - pos;
+
+    memmove(path->chars, p, copy_length);
+	path->chars[copy_length] = '\0';
+}
+
 void pathAppendChar(Path *path, char c)
 {
     ensureCapacity(path, path->length + 1);
@@ -458,6 +471,8 @@ WrenInterpretResult runFile(WrenVM *vm, const char *path)
 
     pathRemoveExtension(module);
 
+    trimPathPrefix(module);
+    
     WrenInterpretResult result = wrenInterpret(vm, module->chars, source);
 
     pathFree(module);

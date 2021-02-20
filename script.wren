@@ -1,6 +1,4 @@
-
 class Script {
-
     construct new() {
         System.print("New Script!")
 
@@ -13,12 +11,28 @@ class Script {
         _move_speed = speed
     }
 
-    enabled() {
-        _enabled
+    enabled=(on) {
+        _enabled = on
+    } 
+
+    enabled {
+        return _enabled
     }
 
-    zomg() {
-        _zomg
+    zomg=(z) {
+        _zomg = z
+    }
+
+    zomg {
+        return _zomg
+    }
+
+    move_speed {
+        return _move_speed
+    }
+
+    move_speed=(speed) {
+        _move_speed = speed
     }
 
     on_update(elapsed_time) {
@@ -27,23 +41,7 @@ class Script {
         System.print("Move Speed: %(_move_speed)")
         _move_speed = _move_speed + elapsed_time
         System.print("New Move Speed: %(_move_speed)")
-    }
-
-    zomg(z) {
-        _zomg = z
-    }
-
-    move_speed() { 
-        _move_speed
-    }
-
-    move_speed(speed) {
-        _move_speed = speed
-    }  
-
-    enabled(on) {
-        _enabled = on
-    }  
+    } 
 }
 
 

@@ -8,6 +8,10 @@
 #include <stdio.h>
 #include <string.h>
 
+
+#define METHOD_MAX 64
+#define METHOD_MAX_LENGTH 128
+
 static WrenVM *vm = NULL;
 
 //This is a simple test runner that serves one purpose:
@@ -24,11 +28,6 @@ static WrenVM *initVM()
     config.loadModuleFn = readModule;
     config.writeFn = vm_write;
     config.errorFn = reportError;
-
-    // if(isAPITest) {
-    //   config.bindForeignClassFn = APITest_bindForeignClass;
-    //   config.bindForeignMethodFn = APITest_bindForeignMethod;
-    // }
 
     // Since we're running in a standalone process, be generous with memory.
     config.initialHeapSize = 1024 * 1024 * 100;
@@ -67,14 +66,14 @@ void test_class_access()
     // Load the class into slot 0.
     wrenEnsureSlots(vm, 1);
     
-    if ( !wrenHasVariable(vm, "../script", "Script"))
+    if ( !wrenHasVariable(vm, "script", "Script"))
     {
         fprintf(stderr, "Script class is missing");
         exit(-1);
     }
     
     // Get a handle to the Script class
-    wrenGetVariable(vm, "../script", "Script", 0);
+    wrenGetVariable(vm, "script", "Script", 0);
     WrenHandle *script_class = wrenGetSlotHandle(vm, 0);
     
     // Set the Script object as the receiver
@@ -129,6 +128,38 @@ size_t strchrpos(const char *str, int c)
     return -1;
 }
 
+void type_to_string(WrenType type)
+{
+    switch(type)
+    {
+    case WREN_TYPE_BOOL:
+        printf("BOOL\n");
+        break;
+    case WREN_TYPE_NUM:
+        printf("NUM\n");
+        break;
+    case WREN_TYPE_FOREIGN:
+        printf("FOREIGN\n");
+        break;
+    case WREN_TYPE_LIST:
+        printf("LIST\n");
+        break;
+    case WREN_TYPE_MAP:
+        printf("MAP\n");
+        break;
+    case WREN_TYPE_NULL:
+        printf("NULL\n");
+        break;
+    case WREN_TYPE_STRING:
+        printf("STRING\n");
+        break;
+
+        // The object is of a type that isn't accessible by the C API.
+    default:
+        printf("UNKNOWN\n");
+    }
+}
+
 bool match_method(const char *method1, const char *method2)
 {
     size_t len_method1 = strchrpos(method1, '('),
@@ -136,7 +167,6 @@ bool match_method(const char *method1, const char *method2)
     
     return len_method1 < len_method2 ? false : memcmp(method1, method2, len_method1) == 0;
 }
-
 
 // Reflection method
 // Processes the Script class into array using the following logic
@@ -150,28 +180,34 @@ bool match_method(const char *method1, const char *method2)
 //
 // Expected result
 //
-//        Script
-//
-//        Constructors
-//        --------------
-//        init new(_)
-//        init new()
-//
-//        Accessors
-//        --------------
-//        enabled
-//        zomg
-//        move_speed
-//
-//        Functions
-//        --------------
-//        on_update(_)
+//      New Script!
+//      On Update
+//      Elapsed Time: 0.5
+//      Move Speed: 1
+//      New Move Speed: 1.5
+//      Script
+//      [class Script 00F12170]
+//      New Script!
+//      
+//      Constructors
+//      --------------
+//      init new(_)
+//      init new()
+//      
+//      Accessors
+//      --------------
+//      enabled: Type: BOOL
+//      zomg: Type: STRING
+//      move_speed: Type: NUM
+//      
+//      Functions
+//      --------------
+//      on_update(_)
 //
 //
 void test_class_reflection()
 {
-    int METHOD_MAX = 64;
-    int METHOD_MAX_LENGTH = 128;
+    WrenInterpretResult result;
 
     int  method_count = 0;
     char methods[METHOD_MAX][METHOD_MAX_LENGTH];
@@ -181,6 +217,8 @@ void test_class_reflection()
     
     int  accessor_count = 0;
     char accessors[32][METHOD_MAX_LENGTH];
+	WrenType accessor_type[32];
+	char accessor_getter[METHOD_MAX_LENGTH];
     
     int  function_count = 0;
     char functions[16][METHOD_MAX_LENGTH];
@@ -188,14 +226,14 @@ void test_class_reflection()
     // Load the class into slot 0.
     wrenEnsureSlots(vm, 1);
     
-    if ( !wrenHasVariable(vm, "../script", "Script"))
+    if ( !wrenHasVariable(vm, "script", "Script"))
     {
         fprintf(stderr, "Script class is missing");
         exit(-1);
     }
     
     // Get a handle to the Script class
-    wrenGetVariable(vm, "../script", "Script", 0);
+    wrenGetVariable(vm, "script", "Script", 0);
     WrenHandle *script_class = wrenGetSlotHandle(vm, 0);
 
     // If the script class variable is valid
@@ -218,21 +256,38 @@ void test_class_reflection()
                 char * name = method->as.closure->fn->debug->name;
                 size_t length = strlen(name);
                 
-                // truncate if necessary
-                if (length > METHOD_MAX_LENGTH)
-                    length = METHOD_MAX_LENGTH;
-                
-                strncpy(methods[method_count], name, length);
-//                printf("%s\n", method->as.closure->fn->debug->name);
-                method_count++;
-                if (method_count >= METHOD_MAX)
-                {
-                    printf("Maximum functions reached\n");
-                    break;
-                }
+				if (length > 0)
+				{
+					// truncate if necessary
+					if (length > METHOD_MAX_LENGTH)
+						length = METHOD_MAX_LENGTH;
+
+					strncpy(methods[method_count], name, length);
+					methods[method_count][length] = '\0';
+					method_count++;
+					if (method_count >= METHOD_MAX)
+					{
+						printf("Maximum functions reached\n");
+						break;
+					}
+				}
             }
         }
     }
+
+	printf("\n");
+	// Get the handle to the script constructor
+	WrenHandle* constructor = wrenMakeCallHandle(vm, "new()");
+
+	// Create a script instance
+	wrenSetSlotHandle(vm, 0, script_class);
+	result = wrenCall(vm, constructor);
+
+	// Check the result
+	handle_result(result);
+
+	// Get a handle to the new instance
+	WrenHandle* script_instance = wrenGetSlotHandle(vm, 0);
     
     // filter the methods into the correct categories
     for (int i = 0; i < method_count; i++)
@@ -253,49 +308,65 @@ void test_class_reflection()
         }
         else
         {
-            // check if matching pair exists in methods list - an accessor
-            bool is_accessor = false;
-            for (int j=0; j < method_count; j++)
-            {
-                if ( (i == j) || methods[j][0] == '\0')
-                    continue;
-                
-                if (match_method(methods[i], methods[j]))
-                {
-                    // store accessor
-                    size_t length = strchrpos(methods[i], '(')-1;
-                    strncpy(accessors[accessor_count], methods[i], length);
-                    accessors[accessor_count][length] = '\0';
-                    accessor_count++;
-                    
-                    // mark both methods as processed
-                    methods[i][0] = '\0';
-                    methods[j][0] = '\0';
-                    is_accessor = true;
-                    
-                    break;
-                }
-            }
-            
-            if (!is_accessor)
-            {
-                size_t length = strchrpos(methods[i], ')');
-                strncpy(functions[function_count], methods[i], length);
-                functions[function_count][length] = '\0';
-                function_count++;
-                
-                methods[i][0] = '\0';
-            }
+			
+			// If the method doesn't have parentheses - it is a getter
+			bool is_getter = (strchr(methods[i], '(') == NULL);
+
+            // If the method has an = sign then it is a setter
+            bool is_setter = (strstr(methods[i], "=(") != NULL);
+
+            if (is_setter)
+			{
+				// ignore and mark as processed
+				methods[i][0] = '\0';
+			}
+			else if (is_getter)
+			{
+				// store getter function name
+				size_t length = strlen(methods[i]);
+				strncpy(accessors[accessor_count], methods[i], length);
+				accessors[accessor_count][length] = '\0';
+				
+				// Set the script instance
+				wrenSetSlotHandle(vm, 0, script_instance);
+
+                // Get a handle to the getter function on the instance
+				WrenHandle* accessor_handle = wrenMakeCallHandle(vm, methods[i]);
+
+                // Call it to get the getter value
+				result = wrenCall(vm, accessor_handle);
+
+				// Check the result
+				handle_result(result);
+
+                // Get the type of value returned from the getter
+				accessor_type[accessor_count] = wrenGetSlotType(vm, 0);
+				accessor_count++;
+
+				methods[i][0] = '\0';
+			}
+			else
+			{
+				size_t length = strchrpos(methods[i], ')');
+				strncpy(functions[function_count], methods[i], length);
+				functions[function_count][length] = '\0';
+				function_count++;
+
+				methods[i][0] = '\0';
+			}
         }
     }
-    
+
     printf("\nConstructors\n--------------\n");
     for (int i = 0; i < constructor_count; i++)
         printf("%s\n", constructors[i]);
     
     printf("\nAccessors\n--------------\n");
     for (int i = 0; i < accessor_count; i++)
-        printf("%s\n", accessors[i]);
+    {
+		printf("%s: Type: ", accessors[i]);
+        type_to_string(accessor_type[i]);
+    }
     
     printf("\nFunctions\n--------------\n");
     for (int i = 0; i < function_count; i++)
@@ -306,7 +377,6 @@ void test_class_reflection()
 
 int main(int argc, const char *argv[])
 {
-
     int handled = handle_args(argc, argv);
     if (handled != 0)
         return handled;
