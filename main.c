@@ -3,16 +3,26 @@
 #include <wren_vm.h>
 #include <wren_debug.h>
 
-#include "wren_util.h"
-
 #include <stdio.h>
 #include <string.h>
 
+#include "wren_util.h"
+#include "vec3.h"
 
 #define METHOD_MAX 64
 #define METHOD_MAX_LENGTH 128
 
 static WrenVM *vm = NULL;
+
+WrenForeignClassMethods bindForeignClass(WrenVM* vm, 
+                                         const char* module, 
+                                         const char* className);
+
+WrenForeignMethodFn bindForeignMethod(WrenVM* vm,
+                                      const char* moduleName,
+                                      const char* className,
+                                      bool isStatic,
+                                      const char* signature);
 
 //This is a simple test runner that serves one purpose:
 //To run the language level tests and benchmarks for Wren.
@@ -28,6 +38,9 @@ static WrenVM *initVM()
     config.loadModuleFn = readModule;
     config.writeFn = vm_write;
     config.errorFn = reportError;
+
+    config.bindForeignClassFn = bindForeignClass;
+    config.bindForeignMethodFn = bindForeignMethod;
 
     // Since we're running in a standalone process, be generous with memory.
     config.initialHeapSize = 1024 * 1024 * 100;
@@ -375,6 +388,74 @@ void test_class_reflection()
     wrenReleaseHandle(vm, script_class);
 }
 
+void test_foreign_class()
+{
+    WrenInterpretResult result;
+
+    // Load the class into slot 0.
+    wrenEnsureSlots(vm, 1);
+    
+    if ( !wrenHasVariable(vm, "script", "BehaviourComponent"))
+    {
+        fprintf(stderr, "Script class is missing");
+        exit(-1);
+    }
+    
+    // Get a handle to the Script class
+    wrenGetVariable(vm, "script", "BehaviourComponent", 0);
+    WrenHandle *script_class = wrenGetSlotHandle(vm, 0);
+
+    printf("\n");
+	// Get the handle to the script constructor
+	WrenHandle* constructor = wrenMakeCallHandle(vm, "new()");
+    WrenHandle* update = wrenMakeCallHandle(vm, "update(_)");
+    WrenHandle* pos_setter = wrenMakeCallHandle(vm, "pos(_)");
+
+	// Create a script instance
+	wrenSetSlotHandle(vm, 0, script_class);
+	result = wrenCall(vm, constructor);
+
+	// Check the result
+	handle_result(result);
+
+	// Get a handle to the new instance
+	WrenHandle* script_instance = wrenGetSlotHandle(vm, 0);
+    
+    // Set new vec3.x  parameter
+    wrenSetSlotDouble(vm, 1, 0.5f);
+
+    // Call Script.update
+    result = wrenCall(vm, update);
+
+    // Check the result
+    handle_result(result);
+
+    // TODO: Create an object, don't call the constructor 
+    // Create a vec3 object
+    // and set the pos field to the vec3 object via the setter
+
+}
+
+WrenForeignClassMethods bindForeignClass(WrenVM* vm, const char* module, const char* className)
+{
+    WrenForeignClassMethods methods;
+    bind_vec3_class(vm, &methods, module, className);
+
+    return methods;
+}
+
+WrenForeignMethodFn bindForeignMethod(WrenVM* vm,
+                                      const char* moduleName,
+                                      const char* className,
+                                      bool isStatic,
+                                      const char* signature)
+{
+    WrenForeignMethodFn func;
+    func = bind_vec3_methods(vm, moduleName, className, isStatic, signature);
+
+    return func;
+}
+
 int main(int argc, const char *argv[])
 {
     int handled = handle_args(argc, argv);
@@ -394,6 +475,9 @@ int main(int argc, const char *argv[])
     
     // Process class method reflection
     test_class_reflection();
+
+    // Process foreign class testing
+    test_foreign_class();
 
     wrenFreeVM(vm);
 

@@ -1,4 +1,32 @@
-class Script {
+
+foreign class Vec3 {
+    construct new() {}
+    foreign x()
+    foreign x(v)
+
+    foreign toString()
+}
+
+
+class Component {
+    pos { _pos }
+    pos=(v) { _pos=v }
+}
+
+class BehaviourComponent is Component {
+    construct new() {
+        pos = Vec3.new()
+    }
+
+    update(value) {
+        pos.x(value)
+
+        System.print("Pos Vec3: %(pos.toString())")
+    }
+}
+    
+
+class Script is Component {
     construct new() {
         System.print("New Script!")
 
@@ -41,7 +69,7 @@ class Script {
         System.print("Move Speed: %(_move_speed)")
         _move_speed = _move_speed + elapsed_time
         System.print("New Move Speed: %(_move_speed)")
-    } 
+    }
 }
 
 
