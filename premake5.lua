@@ -1,5 +1,4 @@
 
-workspace "wren-test"
    configurations { "Debug", "Release" }
 
    filter "configurations:Debug"
@@ -22,6 +21,7 @@ workspace "wren-test"
 
    filter { "system:linux" }
       -- buildoptions { "-std=c99" }
+      links { "m" }
       defines {
          "TINY_LINUX"
       }
