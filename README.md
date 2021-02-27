@@ -17,4 +17,4 @@ Items that need testing
     - [x] How do we find out what the parameter types for a function or accessor is?
 - [x] class getter / setter access
 - [x] class extension from foreign base class - Don't extend, just inject
-- [ ] what does wrapping and exposing various structs to wren look like i.e. Vec3 
+- [x] what does wrapping and exposing various structs to wren look like i.e. Vec3

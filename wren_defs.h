@@ -4,28 +4,35 @@
 
 #include <wren.h>
 
-#define wren_bind_foreign_begin(type, name)                                     \
+#define wren_bind_foreign_alloc_begin(type, name)                               \
 void type##_allocate(WrenVM* vm)                                                \
 {                                                                               \
     type** v = (type**)wrenSetSlotNewForeign(vm,0, 0, sizeof(type*));           \
     *v = (type*)malloc(sizeof(type));                                           \
                                                                                 \
-    /*printf(#type " constructor\n");*/                                             \
-}                                                                               \
-                                                                                \
+    if ((*v) != NULL)                                                           \
+    {
+
+#define wren_bind_foreign_string_alloc(name)                                    \
+        (*v)->name = NULL;
+
+#define wren_bind_foreign_alloc_end()                                           \
+    }                                                                           \
+}                                                                               
+
+#define wren_bind_foreign_final_begin(type, name)                               \
 void type##_finalize(void* data)                                                \
 {                                                                               \
     type**v = ((type**) data);                                                  \
                                                                                 \
     if (*v != NULL)                                                             \
-    {                                                                           \
-        /*printf(#type " destructor\n");*/
+    {
 
-#define wren_bind_accessor_string(name)   \
-        if ((*v)->name != NULL)           \
+#define wren_bind_foreign_string_final(name)                                    \
+        if ((*v)->name != NULL)                                                 \
             free((*v)->name);
 
-#define wren_bind_foreign_end(type, name)                                       \
+#define wren_bind_foreign_final_end(type, name)                                 \
         free(*v);                                                               \
         *v = NULL;                                                              \
     }                                                                           \
@@ -152,11 +159,12 @@ void type##_set_##field_name(WrenVM *vm)                \
         string = NULL;                                  \
     }                                                   \
     size_t length = strlen(str_value);                  \
-    (*v)->field_var = (char*)malloc(sizeof(char) * length);      \
+    (*v)->field_var = (char*)malloc(sizeof(char) * length + 1);      \
     string = (*v)->field_var;                           \
     if (string != NULL)                                 \
     {                                                   \
         strncpy(string, str_value, length);             \
+        string[length] = '\0';                          \
     }                                                   \
 }                                                       \
                                                         \

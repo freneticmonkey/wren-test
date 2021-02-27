@@ -12,8 +12,11 @@ typedef struct vec3 {
     float v[3];
 } vec3;
 
-wren_bind_foreign_begin(vec3, Vec3)
-wren_bind_foreign_end(vec3, Vec3)
+wren_bind_foreign_alloc_begin(vec3, Vec3)
+wren_bind_foreign_alloc_end()
+
+wren_bind_foreign_final_begin(vec3, Vec3)
+wren_bind_foreign_final_end(vec3, Vec3)
 
 wren_define_accessor_float(vec3, x, v[0])
 wren_define_accessor_float(vec3, y, v[1])
@@ -46,9 +49,13 @@ typedef struct node {
     char * name;
 } node;
 
-wren_bind_foreign_begin(node, Node)
-wren_bind_accessor_string(name)
-wren_bind_foreign_end(node, Node)
+wren_bind_foreign_alloc_begin(node, Node)
+	wren_bind_foreign_string_alloc(name)
+wren_bind_foreign_alloc_end()
+
+wren_bind_foreign_final_begin(node, Node)
+	wren_bind_foreign_string_final(name)
+wren_bind_foreign_final_end(node, Node)
 
 wren_define_accessor_string(node, name, name)
 
