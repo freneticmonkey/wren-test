@@ -187,11 +187,13 @@ void type##_get_##field_name(WrenVM *vm)                \
     wrenSetSlotString(vm, 0, v->field_var);          \
 }
 
+//    *f = (field_type*)malloc(sizeof(field_type));                               
+
 #define wren_define_accessor_foreign(type, field_name, field_type, field_var)  \
   void type##_set_##field_name(WrenVM *vm) {                                   \
-    type **v = (type **)wrenGetSlotForeign(vm, 0);                             \
+    type *v = (type *)wrenGetSlotForeign(vm, 0);                             \
                                                                                \
-    if (*v == NULL) {                                                          \
+    if (v == NULL) {                                                          \
       wrenSetSlotString(vm, 0, #type " is invalid");                           \
       wrenAbortFiber(vm, 0);                                                   \
       return;                                                                  \
@@ -199,24 +201,23 @@ void type##_get_##field_name(WrenVM *vm)                \
     field_type *value = (field_type *)wrenGetSlotForeign(vm, 1);                 \
     if (value != NULL)  \
     {   \
-        memcpy(&(*v)->field_var, value, sizeof(field_type) );   \
+        memcpy(&(v->field_var), value, sizeof(field_type) );   \
     }   \
   }                                                                            \
                                                                                \
   void type##_get_##field_name(WrenVM *vm) {                                   \
-    type **v = (type **)wrenGetSlotForeign(vm, 0);                             \
+    type *v = (type *)wrenGetSlotForeign(vm, 0);                             \
                                                                                \
-    if (*v == NULL) {                                                          \
+    if (v == NULL) {                                                          \
       wrenSetSlotString(vm, 0, #type " is invalid");                           \
       wrenAbortFiber(vm, 0);                                                   \
       return;                                                                  \
     }                                                                          \
-    field_type** f = (field_type**)wrenSetSlotNewForeign(vm,0, 0, sizeof(field_type*)); \
-    *f = (field_type*)malloc(sizeof(field_type));                               \
+    field_type* f = (field_type*)wrenSetSlotNewForeign(vm,0, 0, sizeof(field_type)); \
                                                                                 \
-    if ((*f) != NULL)                                                           \
+    if (f != NULL)                                                           \
     {                                                                           \
-        memcpy(*f, &(*v)->field_var, sizeof(field_type));                        \
+        memcpy(f, &(v->field_var), sizeof(field_type));                        \
     }                                                                           \
 }
 

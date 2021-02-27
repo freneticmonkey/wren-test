@@ -1,5 +1,10 @@
 foreign class Vec3 {
     construct new() {}
+    construct new(nx, ny , nz) {
+        x(nx)
+        y(ny)
+        z(nz)
+    }
     foreign x()
     foreign x(v)
 
@@ -14,6 +19,9 @@ foreign class Vec3 {
 
 foreign class Transform {
     construct new() {}
+    construct new(np) {
+        pos(np)
+    }
     foreign pos()
     foreign pos(p)
 }

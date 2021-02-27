@@ -98,11 +98,13 @@ void transform_get_pos(WrenVM *vm) {
     wrenAbortFiber(vm, 0);
     return;
   }
+    wrenGetVariable(vm, "core", "Vec3", 0);
   // TODO: Figure out how to push the Vec3 class into Slot 0
   vec3 *f = (vec3*)wrenSetSlotNewForeign(vm, 0, 0, sizeof(vec3));
   //f = (vec3 *)malloc(sizeof(vec3));
   if (f != NULL) {
-    memcpy(f, &v->pos, sizeof(vec3));
+      vec3 *p = &(v->pos);
+      memcpy(f, p, sizeof(vec3));
   }
 }
 

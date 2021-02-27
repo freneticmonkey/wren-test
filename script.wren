@@ -15,7 +15,8 @@ class BehaviourComponent is Component {
         pos = Vec3.new()
         node = Node.new()
         node.name("hello")
-        transform = Transform.new()
+        
+        transform = Transform.new(Vec3.new(1,2,3))
     }
 
     update(value) {
