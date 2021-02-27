@@ -388,6 +388,13 @@ void test_class_reflection()
     wrenReleaseHandle(vm, script_class);
 }
 
+// Test using the helper defines for wrapping C structs
+//
+// Expected output is:
+//
+//      Pos Vec3: [0.50000, -431602080.00000, -431602080.00000]
+//      node Name: hello
+//
 void test_foreign_class()
 {
     WrenInterpretResult result;
@@ -429,11 +436,6 @@ void test_foreign_class()
 
     // Check the result
     handle_result(result);
-
-    // TODO: Create an object, don't call the constructor 
-    // Create a vec3 object
-    // and set the pos field to the vec3 object via the setter
-
 }
 
 WrenForeignClassMethods bindForeignClass(WrenVM* vm, const char* module, const char* className)
