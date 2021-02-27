@@ -179,49 +179,6 @@ void type##_get_##field_name(WrenVM *vm)                \
     wrenSetSlotString(vm, 0, (*v)->field_var);          \
 }
 
-
-// typedef struct str {
-//     char * value;
-// } str;
-
-// void _set(WrenVM *vm)
-// {
-//     str** s = (str**)wrenGetSlotForeign(vm, 0);
-
-//     if (*s == NULL)
-//     {
-//         wrenSetSlotString(vm, 0, "str is invalid");
-//         wrenAbortFiber(vm, 0);
-//         return;
-//     }
-//     const char *str_value = wrenGetSlotString(vm, 1);
-    
-//     char *string = (*s)->value;
-//     if (string != NULL)
-//     {
-//         free(string);
-//         string = NULL;
-//     }
-//     size_t length = strlen(str_value);
-//     string = (char*)malloc(sizeof(char) * length);
-//     if (string != NULL)
-//         strncpy(string, str_value, length)
-// }
-
-// void _get(WrenVM *vm)
-// {
-//     str** s = (str**)wrenGetSlotForeign(vm, 0);
-
-//     if (*s == NULL)
-//     {
-//         wrenSetSlotString(vm, 0, "str is invalid");
-//         wrenAbortFiber(vm, 0);
-//         return;
-//     }
-//     wrenSetSlotString(vm, 0, (*s)->value);
-// }
-
-
 #define wren_bind_methods_begin(type, name)         \
 WrenForeignMethodFn bind_##type##_methods(WrenVM* vm,\
                            const char* moduleName,  \
