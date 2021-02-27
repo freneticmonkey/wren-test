@@ -394,6 +394,7 @@ void test_class_reflection()
 //
 //      Pos Vec3: [0.50000, -431602080.00000, -431602080.00000]
 //      node Name: hello
+//      Transform: Pos Vec3: [1.00000, 2.00000, 3.00000]
 //
 void test_foreign_class()
 {

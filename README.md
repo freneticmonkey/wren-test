@@ -19,4 +19,4 @@ Items that need testing
 - [x] class extension from foreign base class - Don't extend, just inject
 - [x] what does wrapping and exposing various structs to wren look like i.e. Vec3
 - [x] Define 'built-in' classes in separate module and import
-- [ ] Test wrapping two foriegn classes together
+- [x] Test wrapping two foriegn classes together - Transform -> Vec3
