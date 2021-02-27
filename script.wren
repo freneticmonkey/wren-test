@@ -1,10 +1,13 @@
-import "core" for Vec3, Node
+import "core" for Vec3, Node, Transform
 
 class Component {
     pos { _pos }
     pos=(v) { _pos=v }
     node { _node }
     node=(v) { _node=v }
+
+    transform { _transform }
+    transform=(v) { _transform=v }
 }
 
 class BehaviourComponent is Component {
@@ -12,6 +15,7 @@ class BehaviourComponent is Component {
         pos = Vec3.new()
         node = Node.new()
         node.name("hello")
+        transform = Transform.new()
     }
 
     update(value) {
@@ -19,6 +23,8 @@ class BehaviourComponent is Component {
 
         System.print("Pos Vec3: %(pos.toString())")
         System.print("node Name: %(node.name())")
+        var p = transform.pos()
+        System.print("Transform: Pos Vec3: %(p.toString())")
     }
 }
     

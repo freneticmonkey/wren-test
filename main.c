@@ -443,6 +443,7 @@ WrenForeignClassMethods bindForeignClass(WrenVM* vm, const char* module, const c
     WrenForeignClassMethods methods;
     wren_bind_foreign_class(vec3, methods);
     wren_bind_foreign_class(node, methods);
+    wren_bind_foreign_class(transform, methods);
 
     return methods;
 }
@@ -455,6 +456,7 @@ WrenForeignMethodFn bindForeignMethod(WrenVM* vm,
 {
     wren_bind_foriegn_methods(vec3);
     wren_bind_foriegn_methods(node);
+    wren_bind_foriegn_methods(transform);
     return NULL;
 }
 
