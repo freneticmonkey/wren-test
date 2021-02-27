@@ -466,7 +466,14 @@ int main(int argc, const char *argv[])
     const char *file = argv[1];
 
     vm = initVM();
-    WrenInterpretResult result = runFile(vm, file);
+
+    // import the core module
+    WrenInterpretResult result = runFile(vm, "core.wren");
+
+    handle_result(result);
+
+    // now import the script
+    result = runFile(vm, file);
 
     handle_result(result);
 
@@ -483,5 +490,3 @@ int main(int argc, const char *argv[])
 
     return exitCode;
 }
-
-
