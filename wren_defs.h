@@ -4,8 +4,6 @@
 
 #include <wren.h>
 
-//*v = (type *)malloc(sizeof(type));
-
 #define wren_bind_foreign_alloc_begin(type, name)                               \
   void type##_allocate(WrenVM *vm)                                              \
   {                                                                             \
@@ -32,8 +30,6 @@ void type##_finalize(void* data)                                                
         if (v->name != NULL)                                                    \
             free(v->name);
 
-// free(*v);
-// *v = NULL;
 #define wren_bind_foreign_final_end(type, name)                                 \
     }                                                                           \
 }                                                                               \
