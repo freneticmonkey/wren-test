@@ -73,40 +73,7 @@ wren_bind_foreign_alloc_end()
 wren_bind_foreign_final_begin(transform, Transform)
 wren_bind_foreign_final_end(transform, Transform)
 
-//wren_define_accessor_foreign(transform, pos, vec3, pos)
-
-void transform_set_pos(WrenVM *vm) {
-  transform *v = (transform*)wrenGetSlotForeign(vm, 0);
-  if (v == NULL) {
-    wrenSetSlotString(vm, 0,
-                      "transform"
-                      " is invalid");
-    wrenAbortFiber(vm, 0);
-    return;
-  }
-  vec3 *value = (vec3 *)wrenGetSlotForeign(vm, 1);
-  if (value != NULL) {
-    memcpy(&v->pos, value, sizeof(vec3));
-  }
-}
-void transform_get_pos(WrenVM *vm) {
-  transform *v = (transform *)wrenGetSlotForeign(vm, 0);
-  if (v == NULL) {
-    wrenSetSlotString(vm, 0,
-                      "transform"
-                      " is invalid");
-    wrenAbortFiber(vm, 0);
-    return;
-  }
-    wrenGetVariable(vm, "core", "Vec3", 0);
-  // TODO: Figure out how to push the Vec3 class into Slot 0
-  vec3 *f = (vec3*)wrenSetSlotNewForeign(vm, 0, 0, sizeof(vec3));
-  //f = (vec3 *)malloc(sizeof(vec3));
-  if (f != NULL) {
-      vec3 *p = &(v->pos);
-      memcpy(f, p, sizeof(vec3));
-  }
-}
+wren_define_accessor_foreign(transform, core, Vec3, pos, vec3, pos)
 
 wren_bind_methods_begin(transform, Transform)
     wren_bind_accessor(transform, pos)
