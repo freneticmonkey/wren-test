@@ -439,7 +439,8 @@ void test_foreign_class()
 WrenForeignClassMethods bindForeignClass(WrenVM* vm, const char* module, const char* className)
 {
     WrenForeignClassMethods methods;
-    bind_vec3_class(vm, &methods, module, className);
+    wren_bind_foreign_class(vec3, methods);
+    wren_bind_foreign_class(node, methods);
 
     return methods;
 }
@@ -450,10 +451,9 @@ WrenForeignMethodFn bindForeignMethod(WrenVM* vm,
                                       bool isStatic,
                                       const char* signature)
 {
-    WrenForeignMethodFn func;
-    func = bind_vec3_methods(vm, moduleName, className, isStatic, signature);
-
-    return func;
+    wren_bind_foriegn_methods(vec3);
+    wren_bind_foriegn_methods(node);
+    return NULL;
 }
 
 int main(int argc, const char *argv[])

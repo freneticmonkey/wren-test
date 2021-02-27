@@ -7,21 +7,32 @@ foreign class Vec3 {
     foreign toString()
 }
 
+foreign class Node {
+    construct new() {}
+    foreign name()
+    foreign name(n)
+}
+
 
 class Component {
     pos { _pos }
     pos=(v) { _pos=v }
+    node { _node }
+    node=(v) { _node=v }
 }
 
 class BehaviourComponent is Component {
     construct new() {
         pos = Vec3.new()
+        node = Node.new()
+        node.name("hello")
     }
 
     update(value) {
         pos.x(value)
 
         System.print("Pos Vec3: %(pos.toString())")
+        System.print("node Name: %(node.name())")
     }
 }
     
